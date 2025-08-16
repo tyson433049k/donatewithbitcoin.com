@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Donate Bitcoin</title>
+    <meta name="description" content="Support us with a Bitcoin donation. Secure, fast, and appreciated!" />
+    <meta property="og:title" content="Donate Bitcoin" />
+    <meta property="og:description" content="Support us with a Bitcoin donation." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>₿</text></svg>">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <span class="logo">₿</span>
+          <span class="brand-name">Bitcoin Donation</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-inner">
+          <h1>Support us with Bitcoin</h1>
+          <p class="subhead">
+            Every satoshi helps. Your contribution keeps our work going.
+          </p>
+
+          <div class="donation-card">
+            <label class="label">Bitcoin Address</label>
+            <div class="address-row">
+              <input id="btcAddress" class="address" value="bc1qkrkxls0300hcfhelnmhucf4p3z0fja22yyzlnq" readonly aria-label="Bitcoin address" />
+              <button id="copyBtn" class="btn" type="button" aria-label="Copy address">Copy</button>
+            </div>
+
+            <div class="controls">
+              <div class="field">
+                <label for="amount">Amount (BTC) — optional</label>
+                <input id="amount" type="number" step="0.00000001" min="0" placeholder="e.g., 0.001" />
+              </div>
+              <div class="field">
+                <label for="label">Label — optional</label>
+                <input id="label" type="text" maxlength="80" placeholder="Donation" />
+              </div>
+            </div>
+
+            <div class="qr-and-link">
+              <div class="qr-wrap">
+                <img id="qrImage" alt="Bitcoin QR code" />
+              </div>
+              <a id="donateLink" class="btn primary" href="#" target="_blank" rel="noopener">Open in Wallet</a>
+            </div>
+
+            <p class="hint">
+              Tip: Scan the QR code with your wallet app, or click “Open in Wallet.”
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="how-it-works">
+        <div class="container">
+          <h2>How it works</h2>
+          <ol>
+            <li>Enter an amount (optional) and label (optional).</li>
+            <li>Scan the QR code with your Bitcoin wallet, or click “Open in Wallet”.</li>
+            <li>Confirm the transaction in your wallet. That’s it!</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>Thank you for your support! ₿</p>
+      </div>
+    </footer>
+
+    <script>
+      (function() {
+        const address = "bc1qkrkxls0300hcfhelnmhucf4p3z0fja22yyzlnq";
+        const amountEl = document.getElementById('amount');
+        const labelEl = document.getElementById('label');
+        const donateLink = document.getElementById('donateLink');
+        const qrImage = document.getElementById('qrImage');
+        const copyBtn = document.getElementById('copyBtn');
+        const btcAddress = document.getElementById('btcAddress');
+
+        function buildBitcoinURI() {
+          const params = new URLSearchParams();
+          const amount = parseFloat(amountEl.value);
+          if (!isNaN(amount) && amount > 0) {
+            params.set('amount', amount.toFixed(8));
+          }
+          const label = (labelEl.value || '').trim();
+          if (label) {
+            params.set('label', label);
+          }
+          const qs = params.toString();
+          return qs ? `bitcoin:${address}?${qs}` : `bitcoin:${address}`;
+        }
+
+        function updateUI() {
+          const uri = buildBitcoinURI();
+          donateLink.href = uri;
+          // Use a public, no-auth QR code generator. Image is generated client-side via external service.
+          const encoded = encodeURIComponent(uri);
+          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
+        }
+
+        // copy address
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(address);
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+          } catch (e) {
+            // fallback select mechanics
+            btcAddress.select();
+            document.execCommand('copy');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+          }
+        });
+
+        amountEl.addEventListener('input', updateUI);
+        labelEl.addEventListener('input', updateUI);
+
+        // Initialize
+        updateUI();
+      })();
+    </script>
+  </body>
+</html>
