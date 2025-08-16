@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin Donation</title>
+  <link rel="stylesheet" href="styles1.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Donate Bitcoin</h1>
+    <p>Scan the QR code or copy the address below to donate:</p>
+
+    <img id="qrImage" alt="Bitcoin QR code">
+
+    <input type="number" id="amount" placeholder="Amount (optional)" step="0.00000001">
+
+    <input type="text" id="label" placeholder="Label (optional)" value="MyDonationSite">
+
+    <button id="copyBtn">Copy Address</button>
+    <button id="donateBtn">Open in Wallet</button>
+
+    <p id="walletHint" style="color:#ff9900; display:none;">
+      If nothing opens, copy the address and paste it into your wallet.
+    </p>
+
+    <p id="copiedMsg" style="color:green; display:none;">Address copied!</p>
+
+    <p><strong>Bitcoin Address:</strong> <span id="btcAddress">bc1qkrkxls0300hcfhelnmhucf4p3z0fja22yyzlnq</span></p>
+  </div>
+
+  <script>
+    const address = "bc1qkrkxls0300hcfhelnmhucf4p3z0fja22yyzlnq";
+    const qrImage = document.getElementById("qrImage");
+    const amountEl = document.getElementById("amount");
+    const labelEl = document.getElementById("label");
+    const copyBtn = document.getElementById("copyBtn");
+    const donateBtn = document.getElementById("donateBtn");
+    const walletHint = document.getElementById("walletHint");
+    const copiedMsg = document.getElementById("copiedMsg");
+
+    function buildBitcoinURI() {
+      const params = new URLSearchParams();
+      const amount = parseFloat(amountEl.value);
+      if (!isNaN(amount) && amount > 0) {
+        params.set('amount', amount.toFixed(8));
+      }
+      const label = (labelEl.value || 'MyDonationSite').trim();
+      if (label) {
+        params.set('label', label);
+      }
+      return params.toString() ? `bitcoin:${address}?${params.toString()}` : `bitcoin:${address}`;
+    }
+
+    function updateQR() {
+      const uri = buildBitcoinURI();
+      const encoded = encodeURIComponent(uri);
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encoded}`;
+    }
+
+    amountEl.addEventListener("input", updateQR);
+    labelEl.addEventListener("input", updateQR);
+    updateQR(); // initial QR
+
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(address).then(() => {
+        copiedMsg.style.display = 'block';
+        setTimeout(() => copiedMsg.style.display = 'none', 2000);
+      });
+    });
+
+    donateBtn.addEventListener("click", () => {
+      const uri = buildBitcoinURI();
+      window.location.href = uri; // tries to open wallet
+      setTimeout(() => { walletHint.style.display = 'block'; }, 1500);
+    });
+  </script>
+</body>
+</html>
